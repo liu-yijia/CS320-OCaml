@@ -1,4 +1,3 @@
-
 (* the type of a plymorphic tree *)
 type 'a tree =
   | Leaf of 'a 
