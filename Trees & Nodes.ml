@@ -4,84 +4,60 @@ type 'a tree =
   | Leaf of 'a 
   | Node of 'a tree * 'a tree
 
-
-
-(*
-write a map function for trees:
-
-For example,
+(* map function for trees:
+Example:
 map_tree (fun x -> x+1) (Node (Leaf 1, Leaf 2)) =  (Node (Leaf 2, Leaf 3))
 map_tree (fun _ -> 0)  (Node (Node (Leaf true, Node (Leaf true, Leaf false)), Node (Node (Leaf true, Node (Leaf true, Leaf false)), Leaf false))) =
-                       (Node (Node (Leaf 0   , Node (Leaf 0   , Leaf 0    )), Node (Node (Leaf 0   , Node (Leaf 0   , Leaf 0    )), Leaf 0    )))
-*)
+                       (Node (Node (Leaf 0   , Node (Leaf 0   , Leaf 0    )), Node (Node (Leaf 0   , Node (Leaf 0   , Leaf 0    )), Leaf 0    ))) *)
 let rec map_tree (f: 'a -> 'b) (tree: 'a tree): 'b tree = 
   match tree with 
     Leaf x -> Leaf (f x)
   |
     Node (left,right) -> Node (map_tree f left, map_tree f right)
 
-
-(*
-write a fold function for trees:
-
-For example,
+(* fold function for trees:
+Example:
 fold_tree ( * ) (fun x -> x) (Node (Leaf 3, Leaf 2)) = 6
-fold_tree (+) (fun _ -> 1) (Node (Node (Leaf true, Node (Leaf true, Leaf false)), Node (Node (Leaf true, Node (Leaf true, Leaf false)), Leaf false))) = 7
-*)
+fold_tree (+) (fun _ -> 1) (Node (Node (Leaf true, Node (Leaf true, Leaf false)), Node (Node (Leaf true, Node (Leaf true, Leaf false)), Leaf false))) = 7 *)
 let rec fold_tree (node: 'b -> 'b -> 'b) (leaf: 'a -> 'b) (tree: 'a tree): 'b  = 
   match tree with
     Leaf x -> leaf x
   |
     Node (left,right) -> node (fold_tree node leaf left) (fold_tree node leaf right)
 
-
-(*
-sum the contents of an int tree
-
-For example,
-sum_ints (Node (Leaf 1, Leaf 2)) = 3
-*)
+(* sum the contents of an int tree
+Example:
+sum_ints (Node (Leaf 1, Leaf 2)) = 3 *)
 let rec sum_ints (tree: int tree): int = 
   match tree with 
     Leaf x -> x
   |
     Node (left,right) -> sum_ints left + sum_ints right
 
-
-(*
-find the size of the tree
-
-For example,
+(* find the size of the tree
+Example:
 tree_size (Leaf 1) = 1
-tree_size (Node (Leaf 1, Leaf 2)) = 3
-*)
+tree_size (Node (Leaf 1, Leaf 2)) = 3 *)
 let rec tree_size (tree: 'a tree): int = 
   match tree with
     Leaf x -> 1
   |
     Node (left,right) -> tree_size left + tree_size right + 1
 
-
-(*
-find the height of the tree
-
-For example,
+(* find the height of the tree
+Example:
 tree_height (Leaf 2) = 1
-tree_height (Node ((Node (Leaf 1, (Node ((Node (Leaf 1, Leaf 2)), Leaf 2)))), Leaf 2)) = 5
-*)
+tree_height (Node ((Node (Leaf 1, (Node ((Node (Leaf 1, Leaf 2)), Leaf 2)))), Leaf 2)) = 5 *)
 let rec tree_height (tree: 'a tree): int = 
   match tree with
     Leaf x -> 1
   |
     Node (left,right) -> max (tree_height left) (tree_height right) + 1
 
-(*
-write a function that takes a predicate on trees and retuns true if any subtree satisfies that predicate
-
-For example,
+(* a function that takes a predicate on trees and retuns true if any subtree satisfies that predicate
+Example:
 tree_contains (Node (Leaf 1, Leaf 2)) (fun x -> match x with Leaf 2 -> true | _ -> false) = true
-tree_contains (Node (Leaf 1, (Node ((Node (Leaf 1, Leaf 2)), Leaf 2)))) (fun x -> tree_height x > 2) = true
-*)
+tree_contains (Node (Leaf 1, (Node ((Node (Leaf 1, Leaf 2)), Leaf 2)))) (fun x -> tree_height x > 2) = true *)
 let rec tree_contains (tree: 'a tree) (look_for: 'a tree -> bool): bool = 
   if look_for tree = true then true
   else 
@@ -90,9 +66,7 @@ let rec tree_contains (tree: 'a tree) (look_for: 'a tree -> bool): bool =
     |
       Node (left,right) -> (tree_contains left look_for) || (tree_contains right look_for)
 
-
-(*
-write a function that shows bool trees :
+(* a function that shows bool trees :
 
 For example,
 show_bool_tree (Leaf true) ="true"
@@ -122,12 +96,8 @@ let rec implode (chars: char list) : string =
   | h::t ->  string_of_char h ^ (implode t)
 
 
-(*
-write a fubction that reads bool trees :
-for all (finite) t : bool trees.
-read_bool_tree t = Some (show_bool_tree t)
-
-For example,
+(* write a fubction that reads bool trees : for all (finite) t : bool trees.read_bool_tree t = Some (show_bool_tree t)
+Example:
 read_bool_tree "true" = Some (Leaf true)
 read_bool_tree "false" = Some (Leaf false)
 read_bool_tree "tralse" = None
@@ -135,29 +105,7 @@ read_bool_tree "(true^false)" = Some (Node (Leaf true, Leaf false))
 read_bool_tree "((true^(true^false))^((true^(true^false))^false))" =
 Some
  (Node (Node (Leaf true, Node (Leaf true, Leaf false)),
-   Node (Node (Leaf true, Node (Leaf true, Leaf false)), Leaf false)))
-*)
-
-(* Hint 
-   write a helper function 
-   read_bool_prefix : (char list) -> ((bool * (char list)) option) 
-
-   such that
-   read_bool_prefix (explode "true???")       = Some (true, ['?'; '?'; '?'])
-   read_bool_prefix (explode "false123")      = Some (false, ['1'; '2'; '3'])
-   read_bool_prefix (explode "antythingales") = None
-   read_bool_prefix []                        = None
-
-   write a helper function 
-   read_bool_tree_prefix (char list) -> ((bool tree * (char list)) option) 
-
-   such that
-   read_bool_tree_prefix [] = None
-   read_bool_tree_prefix (explode "true???") = Some (Leaf true, ['?'; '?'; '?'])
-   read_bool_tree_prefix (explode "(true^false)124") = Some (Node (Leaf true, Leaf false), ['1'; '2'; '4'])
-   read_bool_tree_prefix (explode "(true^(true^false))aaa") = Some (Node (Leaf true, Node (Leaf true, Leaf false)), ['a'; 'a'; 'a'])
-   read_bool_tree_prefix (explode "(true^(true^fa se))aaa") = None
-*)
+   Node (Node (Leaf true, Node (Leaf true, Leaf false)), Leaf false))) *)
 
 let rec read_bool_prefix (l: char list) : ((bool * (char list)) option) =
   match l with
@@ -194,52 +142,22 @@ let rec read_bool_tree_prefix (l : char list) : ((bool tree * (char list)) optio
     |
       Some (left3, rest3) -> Some (Leaf left3, rest3)
 
-
 let rec read_bool_tree (tree: string) : ((bool tree) option) = 
   match (read_bool_tree_prefix (explode tree)) with
     Some (tree,[]) -> Some tree
   |
     _ -> None
 
-
-
-(*
-write a fubction that checks that parenthisis are balnaced:
+(* a fubction that checks that parenthisis are balnaced:
 Parenthisis are balenced if there are no parenthises
 Parenthisis are balenced if ( and )  enclose a balenced parenthises
 Parenthisis are balenced if balenced parenthises are ajacent to a balenced parenthisis
-
-For example,
+Example:
 matching_parens "" = true
 matching_parens "((((((((((()))))))))))" = true
 matching_parens "()()()()()()" = true
 matching_parens "(()())" = true
-matching_parens "())(()" = false
-*)
-
-
-(* Hint 
-   write mutually recursive functions 
-   matching_paren_prefix : (char list) -> ((char list) option)
-   matching_parens_prefix : (char list) -> ((char list) option)
-
-   the and keyword allows mutual recursion
-   let rec matching_paren_prefix (ls: char list) : ((char list) option) = failwith "unimplemented"
-   and matching_parens_prefix  (ls: char list) : ((char list) option) = failwith "unimplemented"
-
-   such that
-   matching_paren_prefix [] = None
-   matching_paren_prefix (explode "(???") = None
-   matching_paren_prefix (explode "()???") = Some ['?'; '?'; '?']
-   matching_paren_prefix (explode "(((())))123") = Some ['1'; '2'; '3']
-   matching_paren_prefix (explode "()()()") = Some ['('; ')'; '('; ')']
-   matching_paren_prefix (explode "(()()())abc") = Some ['a'; 'b'; 'c']
-
-   matching_parens_prefix [] = Some []
-   matching_parens_prefix (explode "()()()") = Some []
-   matching_parens_prefix (explode "()())))") = Some [')'; ')'; ')']
-   matching_parens_prefix (explode ")aa") = Some [')'; 'a'; 'a']
-*)
+matching_parens "())(()" = false *)
 
 let rec matching_parens (tree: string) : bool = 
   let rec aux tree accum = 
